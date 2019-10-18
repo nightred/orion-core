@@ -18,11 +18,12 @@ TILE_SIZE = 32
 MOVE_SPEED = 60
 JUMP_SPEED = 70
 GRAVITY_SPEED = 30
+SPRITESHEET = "assets_platformer/spritesheet.png"
 
 
 class Player(object):
 
-    def __init__(self, x: int, y: int, tile_size: int):
+    def __init__(self, x: int, y: int, tile_size: int, texture):
         self.pos_x = x
         self.pos_y = y
         self.vel_x = 0.0
@@ -31,7 +32,7 @@ class Player(object):
         self.offset_y = tile_size // 2
         self.on_ground = False
         self.sprite = arcade.Sprite()
-        self.sprite.append_texture(arcade.make_soft_square_texture(tile_size, arcade.color.ORANGE, 255, 255))
+        self.sprite.append_texture(texture)
         self.sprite.set_texture(0)
 
     def draw(self):
@@ -54,34 +55,43 @@ class Window(orion_core.Window):
         self.change_x = 0
         self.change_y = 0
         self.debug_color = arcade.color.WARM_BLACK
+        self.spritesheet = orion_core.Spritesheet(SPRITESHEET, TILE_SIZE)
 
     def init(self):
         """ generate the map from the level string and create a player object """
 
         level = ""
-        level += "..............................................................#B"
-        level += "..............................................................#B"
-        level += "..............................................................#B"
-        level += "....#############........##....##....##.......................#B"
-        level += "..............................................................#B"
-        level += "................#........##..#..#..#..####....................#B"
-        level += ".......................##.....................................#B"
-        level += "....###.#......#.....##...................#....................B"
-        level += "....................###..................###..#....#...........B"
-        level += "##########.###.#########..BBBBBBB..BBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-        level += "...##..#####.############.####....BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-        level += "...#...#..................###....BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-        level += "...#..##..#.################....BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-        level += "...#...........................BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-        level += "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+        level += "#.............................................................#B"
+        level += "#.............................................................#B"
+        level += "#.............................................................#B"
+        level += "#...#############........##....##....##.......................#B"
+        level += "#.............................................................#B"
+        level += "#...............#........##..#..#..#..####....................#B"
+        level += "#......................##.....................................#B"
+        level += "#...###.#......#.....##...................#...................#B"
+        level += "#...................###..................###..#....#..........#B"
+        level += "GGGGGGGGGG.GGG.GGGGG###G..GGGGGGG..GGGGGGBBBGGBGGGGBGGGGGGGGGGBB"
+        level += "BBB##..#####.###########G.####....GBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+        level += "BBB#...#..................###....GBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+        level += "BBB#..##..#.################....GBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+        level += "BBB#...........................GBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+        level += "BBBBGGGGGGGGGGGGGGGGGGGGGGGGGGGBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
         level += "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
 
+        textures = dict()
+        textures['.'] = self.spritesheet.get_texture(3)
+        textures['#'] = self.spritesheet.get_texture(2)
+        textures['B'] = self.spritesheet.get_texture(1)
+        textures['G'] = self.spritesheet.get_texture(0)
+
         self.map = orion_core.TileMap(64, 16, TILE_SIZE)
+        self.map.load_texture_map(textures)
         self.map.parse_map_string(level)
         logger.debug("map generated")
 
         player_x, player_y = self.map.tile_to_world(32, 7)
-        self.player = Player(player_x, player_y, TILE_SIZE)
+        player_texture = self.spritesheet.get_texture(4)
+        self.player = Player(player_x, player_y, TILE_SIZE, player_texture)
 
     def on_draw_frame(self) -> None:
         """ frame rendering details """

@@ -8,6 +8,9 @@ logger = logging.getLogger(__name__)
 
 class TileMap(object):
 
+    map_string = ""
+    texture_map = {}
+
     def __init__(self, width, height, tile_size):
         self.width = width * tile_size
         self.height = height * tile_size
@@ -17,33 +20,20 @@ class TileMap(object):
         self.tile_offset_x = self.tile_size // 2
         self.tile_offset_y = self.tile_size // 2
         self.map_sprite_tiles = arcade.SpriteList()
-        self.map_string = ""
+
+    def load_texture_map(self, textures: dict) -> None:
+        self.texture_map = textures
 
     def parse_map_string(self, map_string) -> None:
         self.map_string = map_string
-
-        # background
-        tile_bg = arcade.make_soft_square_texture(self.tile_size,
-                                                  arcade.color.LIGHT_CORNFLOWER_BLUE,
-                                                  255, 255)
-        # block
-        tile_bk = arcade.make_soft_square_texture(self.tile_size,
-                                                  arcade.color.JUNGLE_GREEN,
-                                                  255, 255)
-        tile_bd = arcade.make_soft_square_texture(self.tile_size,
-                                                  arcade.color.BROWN,
-                                                  255, 255)
 
         for y in range(self.tile_height):
             for x in range(self.tile_width):
                 c = map_string[y * self.tile_width + x]
                 sprite = arcade.Sprite()
-                if c == '#':
-                    sprite.append_texture(tile_bk)
-                elif c == 'B':
-                    sprite.append_texture(tile_bd)
-                else:
-                    sprite.append_texture(tile_bg)
+                if c not in self.texture_map:
+                    continue
+                sprite.append_texture(self.texture_map[c])
                 sprite.set_texture(0)
                 sprite.center_x = self.tile_size * x + self.tile_offset_x
                 sprite.center_y = self.height - self.tile_size * y - self.tile_offset_y
