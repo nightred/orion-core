@@ -11,33 +11,39 @@ logger.info("example application")
 # window constants
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
-SCREEN_TITLE = "Orion Engine: rpg example"
+SCREEN_TITLE = "Orion Engine: platformer example"
 
 # game constants
 TILE_SIZE = 32
-MOVE_SPEED = 60
-JUMP_SPEED = 70
-GRAVITY_SPEED = 30
+MOVE_SPEED = 110
+JUMP_SPEED = 120
+GRAVITY_SPEED = 100
 SPRITESHEET = "assets_platformer/spritesheet.png"
 
 
 class Player(object):
 
-    def __init__(self, x: int, y: int, tile_size: int, texture):
+    def __init__(self, x: int, y: int, tile_size: int, textures):
         self.pos_x = x
         self.pos_y = y
         self.vel_x = 0.0
         self.vel_y = 0.0
+        self.dir_face_x = 0
         self.offset_x = tile_size // 2
         self.offset_y = tile_size // 2
         self.on_ground = False
         self.sprite = arcade.Sprite()
-        self.sprite.append_texture(texture)
+        for texture in textures:
+            self.sprite.append_texture(texture)
         self.sprite.set_texture(0)
 
     def draw(self):
         self.sprite.center_x = self.pos_x
         self.sprite.center_y = self.pos_y
+        if self.dir_face_x == 0:
+            self.sprite.set_texture(1)
+        else:
+            self.sprite.set_texture(0)
         self.sprite.draw()
 
 
@@ -54,7 +60,7 @@ class Window(orion_core.Window):
         self.map = None
         self.change_x = 0
         self.change_y = 0
-        self.debug_color = arcade.color.WARM_BLACK
+        self.debug_color = orion_core.color.WARM_BLACK
         self.spritesheet = orion_core.Spritesheet(SPRITESHEET, TILE_SIZE)
 
     def init(self):
@@ -90,8 +96,11 @@ class Window(orion_core.Window):
         logger.debug("map generated")
 
         player_x, player_y = self.map.tile_to_world(32, 7)
-        player_texture = self.spritesheet.get_texture(4)
-        self.player = Player(player_x, player_y, TILE_SIZE, player_texture)
+        player_textures = [
+            self.spritesheet.get_texture(4),
+            self.spritesheet.get_texture(5)
+            ]
+        self.player = Player(player_x, player_y, TILE_SIZE, player_textures)
 
     def on_draw_frame(self) -> None:
         """ frame rendering details """
@@ -101,7 +110,7 @@ class Window(orion_core.Window):
 
         for _ in range(len(self.debug_points)):
             x, y = self.debug_points.pop()
-            arcade.draw_point(x, y, arcade.color.YELLOW, 4)
+            arcade.draw_point(x, y, orion_core.color.YELLOW, 4)
 
     def on_update_frame(self, delta_time: float) -> None:
         """ Game logic update per frame """
@@ -112,11 +121,27 @@ class Window(orion_core.Window):
         # set gravity
         player.vel_y += -GRAVITY_SPEED * delta_time
 
-        # create drag
+        # create drag when on ground
         if player.on_ground:
-            player.vel_x += -3.0 * player.vel_x * delta_time
+            player.vel_x += -10.0 * player.vel_x * delta_time
             if abs(player.vel_x) < 0.05:
                 player.vel_x = 0.0
+
+        # check that speed is not unreasonable
+        if self.player.on_ground:
+            if self.player.vel_x > 200.0:
+                self.player.vel_x = 200.0
+            if self.player.vel_x < -200.0:
+                self.player.vel_x = -200.0
+        else:
+            if self.player.vel_x > 80.0:
+                self.player.vel_x = 80.0
+            if self.player.vel_x < -80.0:
+                self.player.vel_x = -80.0
+        if self.player.vel_y > 400.0:
+            self.player.vel_y = 400.0
+        if self.player.vel_y < -400.0:
+            self.player.vel_y = -400.0
 
         # get the new position
         new_pos_x = player.pos_x + player.vel_x * delta_time
@@ -193,34 +218,25 @@ class Window(orion_core.Window):
         """ Key press handling """
         super().on_key_press(key, key_modifiers)
 
-        if key == arcade.key.LEFT:
-            self.player.vel_x = -MOVE_SPEED
-        elif key == arcade.key.RIGHT:
-            self.player.vel_x = MOVE_SPEED
-        elif key == arcade.key.UP:
+        if key == orion_core.key.LEFT:
+            self.player.dir_face_x = 0
+            if self.player.on_ground:
+                self.player.vel_x += -MOVE_SPEED
+            else:
+                self.player.vel_x += -MOVE_SPEED // 4
+        elif key == orion_core.key.RIGHT:
+            self.player.dir_face_x = 1
+            if self.player.on_ground:
+                self.player.vel_x += MOVE_SPEED
+            else:
+                self.player.vel_x += MOVE_SPEED // 4
+        elif key == orion_core.key.UP:
             self.player.vel_y = MOVE_SPEED // 2
-        elif key == arcade.key.DOWN:
-            self.player.vel_y = -MOVE_SPEED
-        elif key == arcade.key.SPACE:
+        elif key == orion_core.key.DOWN:
+            self.player.vel_y = -MOVE_SPEED // 2
+        elif key == orion_core.key.SPACE:
             if self.player.vel_y == 0:
                 self.player.vel_y = JUMP_SPEED
-
-    def on_key_release(self, key: int, key_modifiers: int) -> None:
-        """ Key press handling """
-        super().on_key_release(key, key_modifiers)
-
-        if key == arcade.key.LEFT or key == arcade.key.RIGHT:
-            self.player.vel_x = 0
-        elif key == arcade.key.UP or key == arcade.key.DOWN:
-            self.player.vel_y = 0
-
-    def on_mouse_motion(self, x: int, y: int, delta_x, delta_y) -> None:
-        """ mouse movement handling """
-        super().on_mouse_motion(x, y, delta_x, delta_y)
-
-    def on_mouse_press(self, x: int, y: int, button: int, key_modifiers: int) -> None:
-        """ mouse button press handling """
-        super().on_mouse_press(x, y, button, key_modifiers)
 
 
 if __name__ == '__main__':

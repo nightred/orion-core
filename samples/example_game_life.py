@@ -33,7 +33,7 @@ class Window(orion_core.Window):
         self.change_field = [0] * (CELLS_WIDTH * CELLS_HEIGHT)
 
         self.sprites = arcade.SpriteList()
-        cell_light = arcade.make_soft_square_texture(CELL_SIZE, arcade.color.DARK_YELLOW, 255, 30)
+        cell_light = arcade.make_soft_square_texture(CELL_SIZE, orion_core.color.DARK_YELLOW, 255, 30)
 
         for y in range(CELLS_HEIGHT):
             for x in range(CELLS_WIDTH):
@@ -68,7 +68,7 @@ class Window(orion_core.Window):
                 continue
             arcade.draw_text(text=line,
                              start_x=self.width - padding, start_y=line_y,
-                             color=arcade.color.LIGHT_GRAY, font_size=10,
+                             color=orion_core.color.LIGHT_GRAY, font_size=10,
                              anchor_x="right", anchor_y="bottom")
             line_y -= line_height
 
@@ -101,19 +101,19 @@ class Window(orion_core.Window):
     def on_key_press(self, key: int, key_modifiers: int) -> None:
         super().on_key_press(key, key_modifiers)
 
-        if key == arcade.key.KEY_1:
+        if key == orion_core.key.KEY_1:
             self.board_clear()
 
-        elif key == arcade.key.KEY_2:
+        elif key == orion_core.key.KEY_2:
             self.board_random()
 
-        elif key == arcade.key.KEY_3:
+        elif key == orion_core.key.KEY_3:
             self.board_gun()
 
-        elif key == arcade.key.KEY_4:
+        elif key == orion_core.key.KEY_4:
             self.board_growth()
 
-        elif key == arcade.key.SPACE:
+        elif key == orion_core.key.SPACE:
             self.sim_active = not self.sim_active
 
     def on_mouse_motion(self, x: int, y: int, delta_x, delta_y) -> None:
@@ -125,7 +125,7 @@ class Window(orion_core.Window):
     def on_mouse_press(self, x: int, y: int, button: int, key_modifiers: int) -> None:
         super().on_mouse_press(x, y, button, key_modifiers)
 
-        if button == arcade.MOUSE_BUTTON_LEFT:
+        if button == orion_core.MOUSE_BUTTON_LEFT:
             self.change_field[self.selected_y * CELLS_WIDTH + self.selected_x] = 1
 
     def board_clear(self) -> None:

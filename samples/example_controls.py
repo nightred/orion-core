@@ -19,7 +19,7 @@ class Ball(object):
 
     def __init__(self, position_x=100.0, position_y=100.0,
                  change_x=0.0, change_y=0.0,
-                 radius=15, color=arcade.color.RED):
+                 radius=15, color=orion_core.color.RED):
         self.position_x = position_x
         self.position_y = position_y
         self.change_x = change_x
@@ -70,26 +70,26 @@ class Window(orion_core.Window):
         """ key press handling """
         super().on_key_press(key, key_modifiers)
 
-        if key == arcade.key.LEFT:
+        if key == orion_core.key.LEFT:
             self.ball.change_x = -MOVEMENT_SPEED
 
-        if key == arcade.key.RIGHT:
+        if key == orion_core.key.RIGHT:
             self.ball.change_x = MOVEMENT_SPEED
 
-        if key == arcade.key.UP:
+        if key == orion_core.key.UP:
             self.ball.change_y = MOVEMENT_SPEED
 
-        if key == arcade.key.DOWN:
+        if key == orion_core.key.DOWN:
             self.ball.change_y = -MOVEMENT_SPEED
 
     def on_key_release(self, key: int, key_modifiers: int) -> None:
         """ key press handling """
         super().on_key_release(key, key_modifiers)
 
-        if key == arcade.key.LEFT or key == arcade.key.RIGHT:
+        if key == orion_core.key.LEFT or key == orion_core.key.RIGHT:
             self.ball.change_x = 0
 
-        if key == arcade.key.UP or key == arcade.key.DOWN:
+        if key == orion_core.key.UP or key == orion_core.key.DOWN:
             self.ball.change_y = 0
 
 
